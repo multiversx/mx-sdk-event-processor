@@ -28,32 +28,36 @@ export class EventProcessor {
   }
 
   async callElasticsearchEvents(lastProcessedTimestamp: number): Promise<void> {
-    const url = `${this.options.elasticUrl}/events/_search?scroll=${this.options.scrollTimeout}`;
-    const elasticQuery = this.generateElasticsearchQuery(lastProcessedTimestamp);
-    const result = await axios.post(url, elasticQuery);
+    try {
+      const url = `${this.options.elasticUrl}/events/_search?scroll=${this.options.scrollTimeout}`;
+      const elasticQuery = this.generateElasticsearchQuery(lastProcessedTimestamp);
+      const result = await axios.post(url, elasticQuery);
 
-    if (!result.data || !result.data.hits || !result.data.hits || !result.data.hits.hits) {
-      return;
-    }
-
-    const elasticEvents = result.data.hits.hits;
-    const events = elasticEvents.map((e: { _source: any; }) => e._source);
-    await this.handleElasticEvents(events);
-
-    const scrollId = result.data._scroll_id;
-    while (true) {
-      const scrollResult = await axios.post(`${this.options.elasticUrl}/_search/scroll`,
-        {
-          scroll_id: scrollId,
-        });
-
-      const scrollDocuments = scrollResult.data.hits.hits;
-      if (scrollDocuments.length === 0) {
-        break;
+      if (!result.data || !result.data.hits || !result.data.hits || !result.data.hits.hits) {
+        return;
       }
 
-      const scrollEvents = scrollDocuments.map((e: { _source: any; }) => e._source);
-      await this.handleElasticEvents(scrollEvents);
+      const elasticEvents = result.data.hits.hits;
+      const events = elasticEvents.map((e: { _source: any; }) => e._source);
+      await this.handleElasticEvents(events);
+
+      const scrollId = result.data._scroll_id;
+      while (true) {
+        const scrollResult = await axios.post(`${this.options.elasticUrl}/_search/scroll`,
+          {
+            scroll_id: scrollId,
+          });
+
+        const scrollDocuments = scrollResult?.data?.hits?.hits ?? [];
+        if (scrollDocuments.length === 0) {
+          break;
+        }
+
+        const scrollEvents = scrollDocuments.map((e: { _source: any; }) => e._source);
+        await this.handleElasticEvents(scrollEvents);
+      }
+    } catch (error) {
+      throw new Error(`Error while fetching events from Elasticsearch: ${error}`);
     }
   }
 
