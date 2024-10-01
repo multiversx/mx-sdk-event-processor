@@ -24,6 +24,18 @@ export class EventProcessor {
       throw new Error(`Cannot get the last processed timestamp via the provided getLastProcessedTimestamp()`);
     }
 
+    if (!this.options.elasticUrl) {
+      throw new Error('Missing elasticUrl options');
+    }
+
+    if (!this.options.onEventsReceived) {
+      throw new Error('Missing onEventsReceived callback function');
+    }
+
+    if (!this.options.setLastProcessedTimestamp) {
+      throw new Error('Missing setLastProcessedTimestamp callback function');
+    }
+
     await this.callElasticsearchEvents(maxHeight);
   }
 
