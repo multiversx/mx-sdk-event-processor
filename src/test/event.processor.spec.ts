@@ -121,6 +121,7 @@ describe('EventProcessor', () => {
 
   it('should work and receive events with provided page size', async () => {
     let receivedEvents: any[] = [];
+    let numTimesReceivedEvents = 0;
     const mockResponse1 = createElasticSearchResponse(0, 1, 2, 3);
     const mockResponse2 = createElasticSearchResponse(4, 5, 6);
     const mockResponse3 = createElasticSearchResponse();
@@ -134,7 +135,10 @@ describe('EventProcessor', () => {
       emitterAddresses: ['erd1nz88q5pevl6up2qxsgpqgc0qmnm93lh888wwwa68kmz363kdwz9q8tnems'],
       getLastProcessedTimestamp: async () => 37,
       elasticUrl: 'https://myelastic.com',
-      onEventsReceived: async (highestTimestamp, events) => {receivedEvents.push(...events);},
+      onEventsReceived: async (highestTimestamp, events) => {
+        numTimesReceivedEvents++;
+        receivedEvents.push(...events);
+      },
       setLastProcessedTimestamp: async (timestamp: number) => {},
       pageSize: 10,
     });
@@ -144,6 +148,7 @@ describe('EventProcessor', () => {
       expect(receivedEvents[i].timestamp).toEqual(i);
     }
     expect(axios.post).toHaveBeenCalledTimes(3);
+    expect(numTimesReceivedEvents).toBe(2);
   });
 });
 
