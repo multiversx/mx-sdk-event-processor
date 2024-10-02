@@ -45,15 +45,18 @@ export class EventProcessor {
       const elasticQuery = this.generateElasticsearchQuery(lastProcessedTimestamp);
       const result = await axios.post(url, elasticQuery);
 
-      if (!result.data || !result.data.hits || !result.data.hits || !result.data.hits.hits) {
+      const elasticEvents = result?.data?.hits?.hits ?? [];
+      if (elasticEvents.length === 0) {
         return;
       }
 
-      const elasticEvents = result.data.hits.hits;
       const events = elasticEvents.map((e: { _source: any; }) => e._source);
       await this.handleElasticEvents(events);
 
       const scrollId = result.data._scroll_id;
+      if (!scrollId) {
+        return;
+      }
       while (true) {
         const scrollResult = await axios.post(`${this.options.elasticUrl}/_search/scroll`,
           {
@@ -74,10 +77,6 @@ export class EventProcessor {
   }
 
   async handleElasticEvents(events: EventSource[]) {
-    if (events.length === 0) {
-      return;
-    }
-
     const lastTimestamp = events[events.length - 1].timestamp ?? 0;
 
     const onEventsFunc = this.options.onEventsReceived;
