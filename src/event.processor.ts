@@ -21,7 +21,19 @@ export class EventProcessor {
 
     const maxHeight = await lastTimestampFunc();
     if (maxHeight === undefined) {
-      throw new Error(`Cannot get the last processed timestamp via the provided getLastProcessedTimestamp()`);
+      throw new Error('Cannot get the last processed timestamp via the provided getLastProcessedTimestamp()');
+    }
+
+    if (!this.options.elasticUrl) {
+      throw new Error('Missing elasticUrl options');
+    }
+
+    if (!this.options.onEventsReceived) {
+      throw new Error('Missing onEventsReceived callback function');
+    }
+
+    if (!this.options.setLastProcessedTimestamp) {
+      throw new Error('Missing setLastProcessedTimestamp callback function');
     }
 
     await this.callElasticsearchEvents(maxHeight);
@@ -33,15 +45,18 @@ export class EventProcessor {
       const elasticQuery = this.generateElasticsearchQuery(lastProcessedTimestamp);
       const result = await axios.post(url, elasticQuery);
 
-      if (!result.data || !result.data.hits || !result.data.hits || !result.data.hits.hits) {
+      const elasticEvents = result?.data?.hits?.hits ?? [];
+      if (elasticEvents.length === 0) {
         return;
       }
 
-      const elasticEvents = result.data.hits.hits;
       const events = elasticEvents.map((e: { _source: any; }) => e._source);
       await this.handleElasticEvents(events);
 
       const scrollId = result.data._scroll_id;
+      if (!scrollId) {
+        return;
+      }
       while (true) {
         const scrollResult = await axios.post(`${this.options.elasticUrl}/_search/scroll`,
           {
@@ -62,10 +77,6 @@ export class EventProcessor {
   }
 
   async handleElasticEvents(events: EventSource[]) {
-    if (events.length === 0) {
-      return;
-    }
-
     const lastTimestamp = events[events.length - 1].timestamp ?? 0;
 
     const onEventsFunc = this.options.onEventsReceived;
