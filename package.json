@@ -1,6 +1,6 @@
 {
-  "name": "mx-sdk-event-processor",
-  "version": "1.0.0",
+  "name": "@multiversx/sdk-event-processor",
+  "version": "1.0.1",
   "description": "MultiversX logs&events processor",
   "main": "index.js",
   "scripts": {
