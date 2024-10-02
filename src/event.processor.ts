@@ -21,7 +21,7 @@ export class EventProcessor {
 
     const maxHeight = await lastTimestampFunc();
     if (maxHeight === undefined) {
-      throw new Error(`Cannot get the last processed timestamp via the provided getLastProcessedTimestamp()`);
+      throw new Error('Cannot get the last processed timestamp via the provided getLastProcessedTimestamp()');
     }
 
     if (!this.options.elasticUrl) {

@@ -58,6 +58,22 @@ describe('EventProcessor', () => {
     })).rejects.toThrow(/Missing setLastProcessedTimestamp callback function/);
   });
 
+  it('should throw an error is Elasticsearch call fails', async () => {
+    const eventProcessor = new EventProcessor();
+
+    // Mock axios.post to return a resolved Promise with mockResponse
+    (axios.post as jest.Mock).mockRejectedValue(new Error('Cannot call Elasticsearch'));
+
+    await expect(eventProcessor.start({
+      emitterAddresses: ['erd1nz88q5pevl6up2qxsgpqgc0qmnm93lh888wwwa68kmz363kdwz9q8tnems'],
+      getLastProcessedTimestamp: async () => 37,
+      elasticUrl: 'https://myelastic.com',
+      onEventsReceived: async () => {},
+      setLastProcessedTimestamp: async (timestamp: number) => {},
+    })).rejects.toThrow(/Cannot call Elasticsearch/);
+    expect(axios.post).toHaveBeenCalledTimes(1);
+  });
+
   it('should work but no item matches the filters', async () => {
     const eventProcessor = new EventProcessor();
     let receivedEvents: any[] = [];
