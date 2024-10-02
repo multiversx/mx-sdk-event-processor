@@ -122,7 +122,7 @@ export class EventProcessorOptions {
   eventIdentifiers?: string[];
   pageSize?: number = 10000;
   scrollTimeout?: string = "1m";
-  onEventsReceived?: (highestTimestamp: number, events: EventSource[]) => Promise<void>;
+  onEventsReceived?: (highestTimestamp: number, events: EventSource[]) => void | Promise<void>;
   getLastProcessedTimestamp?: () => Promise<number | undefined>;
   setLastProcessedTimestamp?: (timestamp: number) => Promise<void>;
 
