@@ -1,5 +1,6 @@
 import { EventProcessor } from "../event.processor";
 import axios from "axios";
+import { EventProcessorOptions } from "../types/event.processor.options";
 
 // Mock axios.post
 jest.mock('axios');
@@ -69,7 +70,7 @@ describe('EventProcessor', () => {
       getLastProcessedTimestamp: async () => 37,
       elasticUrl: 'https://myelastic.com',
       onEventsReceived: async () => {},
-      setLastProcessedTimestamp: async (timestamp: number) => {},
+      setLastProcessedTimestamp: async () => {},
     })).rejects.toThrow(/Cannot call Elasticsearch/);
     expect(axios.post).toHaveBeenCalledTimes(1);
   });
@@ -86,8 +87,8 @@ describe('EventProcessor', () => {
       emitterAddresses: ['erd1nz88q5pevl6up2qxsgpqgc0qmnm93lh888wwwa68kmz363kdwz9q8tnems'],
       getLastProcessedTimestamp: async () => 37,
       elasticUrl: 'https://myelastic.com',
-      onEventsReceived: async (highestTimestamp, events) => {receivedEvents = events;},
-      setLastProcessedTimestamp: async (timestamp: number) => {},
+      onEventsReceived: async (_highestTimestamp, events) => {receivedEvents = events;},
+      setLastProcessedTimestamp: async () => {},
     });
 
     expect(receivedEvents?.length).toBe(0);
@@ -104,8 +105,8 @@ describe('EventProcessor', () => {
       emitterAddresses: ['erd1nz88q5pevl6up2qxsgpqgc0qmnm93lh888wwwa68kmz363kdwz9q8tnems'],
       getLastProcessedTimestamp: async () => 37,
       elasticUrl: 'https://httpbin.com/404',
-      onEventsReceived: async (highestTimestamp, events) => {receivedEvents = events;},
-      setLastProcessedTimestamp: async (timestamp: number) => {},
+      onEventsReceived: async (_highestTimestamp, events) => {receivedEvents = events;},
+      setLastProcessedTimestamp: async () => {},
     });
 
     expect(receivedEvents?.length).toBe(0);
@@ -126,8 +127,8 @@ describe('EventProcessor', () => {
       emitterAddresses: ['erd1nz88q5pevl6up2qxsgpqgc0qmnm93lh888wwwa68kmz363kdwz9q8tnems'],
       getLastProcessedTimestamp: async () => 37,
       elasticUrl: 'https://myelastic.com',
-      onEventsReceived: async (highestTimestamp, events) => {receivedEvents = events;},
-      setLastProcessedTimestamp: async (timestamp: number) => {},
+      onEventsReceived: async (_highestTimestamp, events) => {receivedEvents = events;},
+      setLastProcessedTimestamp: async () => {},
     });
 
     expect(receivedEvents?.length).toBe(1);
@@ -155,7 +156,7 @@ describe('EventProcessor', () => {
         numTimesReceivedEvents++;
         receivedEvents.push(...events);
       },
-      setLastProcessedTimestamp: async (timestamp: number) => {},
+      setLastProcessedTimestamp: async () => {},
       pageSize: 10,
     });
 
@@ -165,6 +166,34 @@ describe('EventProcessor', () => {
     }
     expect(axios.post).toHaveBeenCalledTimes(3);
     expect(numTimesReceivedEvents).toBe(2);
+  });
+
+  it('should work and sleep between consecutive requests', async () => {
+    let numTimesReceivedEvents = 0;
+    const mockResponse1 = createElasticSearchResponse(0, 1, 2, 3);
+    const mockResponse2 = createElasticSearchResponse();
+    // Mock axios.post to return a resolved Promise with mockResponse
+    (axios.post as jest.Mock)
+      .mockResolvedValueOnce(mockResponse1) // 1st call
+      .mockResolvedValueOnce(mockResponse2); // 2nd call
+
+    const start = Date.now();
+
+    await eventProcessor.start(new EventProcessorOptions({
+      emitterAddresses: ['erd1nz88q5pevl6up2qxsgpqgc0qmnm93lh888wwwa68kmz363kdwz9q8tnems'],
+      getLastProcessedTimestamp: async () => 37,
+      elasticUrl: 'https://myelastic.com',
+      onEventsReceived: async () => {
+        numTimesReceivedEvents++;
+      },
+      setLastProcessedTimestamp: async () => {},
+      pageSize: 10,
+      delayBetweenRequestsInMilliseconds: 1000,
+    }));
+
+    const duration = Date.now() - start;
+    expect(duration).toBeGreaterThan(1000);
+    expect(numTimesReceivedEvents).toBe(1);
   });
 });
 

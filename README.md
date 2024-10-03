@@ -9,13 +9,15 @@ Event processor for JavaScript and TypeScript (written in TypeScript).
 ## Usage
 
 ```js
-let eventProcessor = new EventProcessor();
+let lastProcessedTimestamp = 1727858320;
+const eventProcessor = new EventProcessor();
 await eventProcessor.start({
     elasticUrl: 'https://index.multiversx.com',
     eventIdentifiers: ['swapTokensFixedInput'],
     emitterAddresses: ['erd1qqqqqqqqqqqqqpgqt0uek344kaerr4gf9g2r8l0f4l8ygyha2jps82u9r6'],
     pageSize: 1000,
     scrollTimeout: "1m",
+    delayBetweenRequestsInMilliseconds: 100,
     getLastProcessedTimestamp: async () => {
         return lastProcessedTimestamp;
     },
