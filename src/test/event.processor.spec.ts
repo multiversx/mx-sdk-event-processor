@@ -188,7 +188,7 @@ describe('EventProcessor', () => {
       },
       setLastProcessedTimestamp: async () => {},
       pageSize: 10,
-      delayBetweenRequestsInMilliseconds: 1000,
+      delayBetweenRequestsInMilliseconds: 1001,
     }));
 
     const duration = Date.now() - start;
