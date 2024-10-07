@@ -1,4 +1,7 @@
 import axios from "axios";
+import { EventSource } from "./types/elastic.event.source";
+import { EventProcessorOptions } from "./types/event.processor.options";
+import { generateElasticsearchQuery } from "./utils/elastic.helpers";
 
 export class EventProcessor {
   private options: EventProcessorOptions = new EventProcessorOptions();
@@ -39,10 +42,10 @@ export class EventProcessor {
     await this.callElasticsearchEvents(maxHeight);
   }
 
-  async callElasticsearchEvents(lastProcessedTimestamp: number): Promise<void> {
+  private async callElasticsearchEvents(lastProcessedTimestamp: number): Promise<void> {
     try {
       const url = `${this.options.elasticUrl}/events/_search?scroll=${this.options.scrollTimeout}`;
-      const elasticQuery = this.generateElasticsearchQuery(lastProcessedTimestamp);
+      const elasticQuery = generateElasticsearchQuery(lastProcessedTimestamp, this.options);
       const result = await axios.post(url, elasticQuery);
 
       const elasticEvents = result?.data?.hits?.hits ?? [];
@@ -58,6 +61,10 @@ export class EventProcessor {
         return;
       }
       while (true) {
+        if (this.options.delayBetweenRequestsInMilliseconds) {
+          await new Promise(resolve => setTimeout(resolve, this.options.delayBetweenRequestsInMilliseconds));
+        }
+
         const scrollResult = await axios.post(`${this.options.elasticUrl}/_search/scroll`,
           {
             scroll_id: scrollId,
@@ -89,69 +96,4 @@ export class EventProcessor {
       await setLatestProcessedTimestampFunc(lastTimestamp);
     }
   }
-
-  generateElasticsearchQuery(timestamp: number) {
-    return {
-      size: this.options.pageSize,
-      query: {
-        bool: {
-          must: [
-            {
-              terms: {
-                identifier: this.options.eventIdentifiers, // Query by identifiers
-              },
-            },
-            {
-              terms: {
-                address: this.options.emitterAddresses, // Query by addresses
-              },
-            },
-            {
-              range: {
-                timestamp: {
-                  gt: `${timestamp}`,
-                },
-              },
-            },
-          ],
-        },
-      },
-      sort: [
-        {
-          timestamp: {
-            order: 'asc', // Sorting by timestamp in ascending order
-          },
-        },
-      ],
-    };
-  }
-}
-
-export class EventProcessorOptions {
-  elasticUrl?: string;
-  emitterAddresses?: string[];
-  eventIdentifiers?: string[];
-  pageSize?: number = 10000;
-  scrollTimeout?: string = "1m";
-  onEventsReceived?: (highestTimestamp: number, events: EventSource[]) => void | Promise<void>;
-  getLastProcessedTimestamp?: () => Promise<number | undefined>;
-  setLastProcessedTimestamp?: (timestamp: number) => Promise<void>;
-
-  constructor(options: Partial<EventProcessorOptions> = {}) {
-    Object.assign(this, options);
-  }
-}
-
-export class EventSource {
-  originalTxHash?: string;
-  logAddress?: string;
-  identifier?: string;
-  address?: string;
-  topics?: string[];
-  shardID?: number;
-  additionalData?: string[];
-  txOrder?: number;
-  txHash?: string;
-  order?: number;
-  timestamp?: number;
 }

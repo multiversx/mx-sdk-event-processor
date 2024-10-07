@@ -13,6 +13,7 @@ async function run() {
       emitterAddresses: ['erd1qqqqqqqqqqqqqpgqt0uek344kaerr4gf9g2r8l0f4l8ygyha2jps82u9r6'],
       pageSize: 1000,
       scrollTimeout: "1m",
+      delayBetweenRequestsInMilliseconds: 100,
       getLastProcessedTimestamp: async () => {
         return lastProcessedTimestamp;
       },
