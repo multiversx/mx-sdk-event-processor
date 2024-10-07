@@ -19,6 +19,14 @@ export function generateElasticsearchQuery(timestamp: number, options: EventProc
     });
   }
 
+  mustClauses.push({
+    range: {
+      timestamp: {
+        gt: `${timestamp}`,
+      },
+    },
+  });
+
   return {
     size: options.pageSize,
     query: {
