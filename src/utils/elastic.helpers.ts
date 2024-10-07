@@ -19,6 +19,22 @@ export function generateElasticsearchQuery(timestamp: number, options: EventProc
     });
   }
 
+  if (options.shardId !== undefined) {
+    mustClauses.push({
+      term: {
+        shardID: options.shardId,
+      },
+    });
+  }
+
+  mustClauses.push({
+    range: {
+      timestamp: {
+        gt: `${timestamp}`,
+      },
+    },
+  });
+
   return {
     size: options.pageSize,
     query: {
