@@ -17,6 +17,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - test-network
 
   chainsimulator:
     container_name: chainsimulator
@@ -35,3 +37,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - test-network
+
+networks:
+  test-network:
