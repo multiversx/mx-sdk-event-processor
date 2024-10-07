@@ -15,6 +15,13 @@ jobs:
       - name: Build and start the Docker images
         run: docker compose -f "e2e-tests/chain-simulator-e2e/docker-compose.yml" up -d --build
 
+      - name: Wait for services to be ready
+        run: |
+          echo "Waiting for services to be healthy..."
+          docker ps
+          docker logs chainsimulator
+          sleep 10 # Wait for 10 seconds to ensure services are up
+
       - name: Print docker containers
         run: docker ps
 
