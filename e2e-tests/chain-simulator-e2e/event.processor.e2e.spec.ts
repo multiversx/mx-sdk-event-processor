@@ -75,7 +75,7 @@ describe('EventProcessor e2e tests with chain simulator', () => {
         emitterAddresses: [scAddress],
         eventIdentifiers: ['ping', 'pong'],
         getLastProcessedTimestamp: async () => lastProcessedTimestamp,
-        elasticUrl: 'http://elasticsearch:9200',
+        elasticUrl: 'http://localhost:9200',
         onEventsReceived: async (highestTimestamp, events) => {
           logMessage(`event processor received ${events.length} events with the highest timestamp ${highestTimestamp}`);
           numOfEventsReceived += events.length;
@@ -122,7 +122,7 @@ describe('EventProcessor e2e tests with chain simulator', () => {
         eventIdentifiers: ['ESDTTransfer'],
         shardId: 0, // Bob is in shard 0. esdt transfers events are emitted on both source and destination shards
         getLastProcessedTimestamp: async () => lastProcessedTimestamp,
-        elasticUrl: 'http://elasticsearch:9200',
+        elasticUrl: 'http://localhost:9200',
         onEventsReceived: async (highestTimestamp, events) => {
           logMessage(`event processor received ${events.length} events with the highest timestamp ${highestTimestamp}`);
           for (const event of events) {

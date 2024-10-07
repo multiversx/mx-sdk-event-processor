@@ -13,7 +13,7 @@ services:
         soft: -1
         hard: -1
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://127.0.0.1:9200" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:9200" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -27,11 +27,11 @@ services:
     depends_on:
       - elasticsearch
     environment:
-      ELASTIC_SEARCH_URL: 'http://elasticsearch:9200'
+      ELASTIC_SEARCH_URL: 'http://localhost:9200'
     ports:
       - "8085:8085"
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://127.0.0.1:8085/simulator/observers" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:8085/simulator/observers" ]
       interval: 10s
       timeout: 5s
       retries: 5
