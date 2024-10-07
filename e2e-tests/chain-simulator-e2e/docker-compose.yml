@@ -28,7 +28,6 @@ services:
       - elasticsearch
     environment:
       ELASTIC_SEARCH_URL: 'http://elasticsearch:9200'
-    hostname: chainsimulator
     ports:
       - 8085:8085
     healthcheck:
