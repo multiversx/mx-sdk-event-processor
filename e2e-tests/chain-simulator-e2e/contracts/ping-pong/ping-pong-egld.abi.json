@@ -1,0 +1,126 @@
+{
+    "buildInfo": {
+        "rustc": {
+            "version": "1.81.0",
+            "commitHash": "eeb90cda1969383f56a2637cbd3037bdf598841c",
+            "commitDate": "2024-09-04",
+            "channel": "Stable",
+            "short": "rustc 1.81.0 (eeb90cda1 2024-09-04)"
+        },
+        "contractCrate": {
+            "name": "ping-pong-egld",
+            "version": "0.0.2",
+            "gitVersion": "v0.53.2-4-g190f26fac"
+        },
+        "framework": {
+            "name": "multiversx-sc",
+            "version": "0.53.2"
+        }
+    },
+    "docs": [
+        "An example contract that emits logs for ping and pong calls. on init you can configure the egld amount to be called at ping"
+    ],
+    "name": "PingPong",
+    "constructor": {
+        "docs": [
+            "Necessary configuration when deploying:",
+            "`ping_amount` - the exact EGLD amount that needs to be sent when `ping`-ing."
+        ],
+        "inputs": [
+            {
+                "name": "ping_amount",
+                "type": "BigUint"
+            }
+        ],
+        "outputs": []
+    },
+    "upgradeConstructor": {
+        "inputs": [
+            {
+                "name": "ping_amount",
+                "type": "BigUint"
+            }
+        ],
+        "outputs": []
+    },
+    "endpoints": [
+        {
+            "docs": [
+                "User sends some EGLD to be locked in the contract for a period of time.",
+                "Optional `_data` argument is ignored."
+            ],
+            "name": "ping",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "EGLD"
+            ],
+            "inputs": [
+                {
+                    "name": "_data",
+                    "type": "ignore",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "docs": [
+                "User can take back funds from the contract.",
+                "Can only be called after expiration."
+            ],
+            "name": "pong",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "getPingAmount",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        }
+    ],
+    "events": [
+        {
+            "docs": [
+                "Signals a successful ping by user with amount"
+            ],
+            "identifier": "",
+            "inputs": [
+                {
+                    "name": "caller",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "pinged_amount",
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "Signals a successful pong by user with amount"
+            ],
+            "identifier": "",
+            "inputs": [
+                {
+                    "name": "caller",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "ponged_amount",
+                    "type": "BigUint"
+                }
+            ]
+        }
+    ],
+    "esdtAttributes": [],
+    "hasCallback": false,
+    "types": {}
+}

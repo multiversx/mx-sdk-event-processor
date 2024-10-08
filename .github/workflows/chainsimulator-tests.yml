@@ -1,0 +1,38 @@
+name: Chain simulator e2e tests workflow
+
+on:
+  pull_request:
+
+jobs:
+  test-chainsimulator-e2e:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build and start the Docker images
+        run: docker compose -f "e2e-tests/chain-simulator-e2e/docker-compose.yml" up -d --build
+
+      - name: Wait for services to be ready
+        run: |
+          echo "Waiting for services to be healthy..."
+          docker ps
+          docker logs chainsimulator
+          sleep 20 # Wait for 20 seconds to ensure services are up
+
+      - name: Print docker containers
+        run: docker ps
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run e2e tests
+        run: npm run test:e2e

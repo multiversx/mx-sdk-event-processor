@@ -23,6 +23,12 @@ export class EventProcessorOptions {
   eventIdentifiers?: string[];
 
   /**
+   * Shard ID to filter events by. Useful for example for ESDT transfers when a log will be issued on both source and destination shard
+   * @type {number | undefined}
+   */
+  shardId?: number;
+
+  /**
    * Number of events to process per page. Defaults to 10,000.
    * @type {number}
    * @default 10000
