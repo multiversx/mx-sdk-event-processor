@@ -1,10 +1,11 @@
 import axios from "axios";
-import { deploySc, sendTransaction, fundAddress, issueEsdt, transferEsdt } from "./utils";
+import { deploySc, sendTransaction, fundAddress, issueEsdt, transferEsdt, IssueEsdtArgs, TransferEsdtArgs, DeployScArgs } from "./chain.simulator.operations";
 import * as fs from "node:fs";
 import { EventProcessor } from "../../src/event.processor";
 import { EventProcessorOptions } from "../../src/types/event.processor.options";
 
 const CHAIN_SIMULATOR_URL = 'http://localhost:8085';
+const ELASTIC_SEARCH_URL = 'http://localhost:9200';
 const ALICE_ADDRESS = 'erd1qyu5wthldzr8wx5c9ucg8kjagg0jfs53s8nr3zpz3hypefsdd8ssycr6th';
 const BOB_ADDRESS = 'erd1spyavw0956vq68xj8y4tenjpq2wd5a9p2c6j8gsz7ztyrnpxrruqzu66jx';
 const CAROL_ADDRESS = 'erd1k2s324ww2g0yj38qn2ch2jwctdy8mnfxep94q9arncc6xecg3xaq6mjse8';
@@ -52,16 +53,35 @@ describe('EventProcessor e2e tests with chain simulator', () => {
       '0de0b6b3a7640000', // 1 egld
     ];
     await fundAddress(CHAIN_SIMULATOR_URL, ALICE_ADDRESS);
-    const scAddress = await deploySc(CHAIN_SIMULATOR_URL, ALICE_ADDRESS, contractCodeRaw, contractArgs);
+    const scAddress = await deploySc(new DeployScArgs({
+      chainSimulatorUrl: CHAIN_SIMULATOR_URL,
+      deployer: ALICE_ADDRESS,
+      contractCodeRaw: contractCodeRaw,
+      hexArguments: contractArgs,
+    }));
     logMessage(`Deployed ping pong SC. Address: ${scAddress}`);
 
     const numPingPongs = 20;
 
     for (let i = 0; i < numPingPongs; i++) {
-      const pingTxHash = await sendTransaction(CHAIN_SIMULATOR_URL, ALICE_ADDRESS, scAddress, 'ping', ONE_EGLD, 20_000_000);
+      const pingTxHash = await sendTransaction({
+        chainSimulatorUrl: CHAIN_SIMULATOR_URL,
+        sender: ALICE_ADDRESS,
+        receiver: scAddress,
+        dataField: 'ping',
+        value: ONE_EGLD,
+        gasLimit: 20_000_000,
+      });
       logMessage(`Called 'ping' function of the contract. Tx hash: ${pingTxHash}`);
 
-      const pongTxHash = await sendTransaction(CHAIN_SIMULATOR_URL, ALICE_ADDRESS, scAddress, 'pong', '0', 20_000_000);
+      const pongTxHash = await sendTransaction({
+        chainSimulatorUrl: CHAIN_SIMULATOR_URL,
+        sender: ALICE_ADDRESS,
+        receiver: scAddress,
+        dataField: 'pong',
+        value: '0',
+        gasLimit: 20_000_000,
+      });
       logMessage(`Called 'pong' function of the contract. Tx hash: ${pongTxHash}`);
     }
 
@@ -75,7 +95,7 @@ describe('EventProcessor e2e tests with chain simulator', () => {
         emitterAddresses: [scAddress],
         eventIdentifiers: ['ping', 'pong'],
         getLastProcessedTimestamp: async () => lastProcessedTimestamp,
-        elasticUrl: 'http://localhost:9200',
+        elasticUrl: ELASTIC_SEARCH_URL,
         onEventsReceived: async (highestTimestamp, events) => {
           logMessage(`event processor received ${events.length} events with the highest timestamp ${highestTimestamp}`);
           numOfEventsReceived += events.length;
@@ -101,13 +121,30 @@ describe('EventProcessor e2e tests with chain simulator', () => {
 
   it('should issue a token and event processor should receive esdt transfers', async () => {
     await fundAddress(CHAIN_SIMULATOR_URL, BOB_ADDRESS);
-    const esdtIdentifier = await issueEsdt(CHAIN_SIMULATOR_URL, BOB_ADDRESS, 'BobToken', 'BOB');
+    const esdtIdentifier = await issueEsdt(new IssueEsdtArgs({
+      chainSimulatorUrl: CHAIN_SIMULATOR_URL,
+      issuer: BOB_ADDRESS,
+      tokenName: 'BobToken',
+      tokenTicker: 'BOB',
+    }));
 
     const numTransfers = 20;
     for (let i = 0; i < numTransfers; i++) {
-      const bobTransferTxHash = await transferEsdt(CHAIN_SIMULATOR_URL, BOB_ADDRESS, ALICE_ADDRESS, esdtIdentifier, 5);
+      const bobTransferTxHash = await transferEsdt(new TransferEsdtArgs({
+        chainSimulatorUrl: CHAIN_SIMULATOR_URL,
+        sender: BOB_ADDRESS,
+        receiver: ALICE_ADDRESS,
+        tokenIdentifier: esdtIdentifier,
+        plainAmountOfTokens: 5,
+      }));
       logMessage(`Transferred 5 tokens to Bob. Tx hash: ${bobTransferTxHash}}`);
-      const carolTransferTxHash = await transferEsdt(CHAIN_SIMULATOR_URL, BOB_ADDRESS, CAROL_ADDRESS, esdtIdentifier, 5);
+      const carolTransferTxHash = await transferEsdt(new TransferEsdtArgs({
+        chainSimulatorUrl: CHAIN_SIMULATOR_URL,
+        sender: BOB_ADDRESS,
+        receiver: CAROL_ADDRESS,
+        tokenIdentifier: esdtIdentifier,
+        plainAmountOfTokens: 5,
+      }));
       logMessage(`Transferred 5 tokens to Carol. Tx hash: ${carolTransferTxHash}}`);
     }
 
@@ -122,7 +159,7 @@ describe('EventProcessor e2e tests with chain simulator', () => {
         eventIdentifiers: ['ESDTTransfer'],
         shardId: 0, // Bob is in shard 0. esdt transfers events are emitted on both source and destination shards
         getLastProcessedTimestamp: async () => lastProcessedTimestamp,
-        elasticUrl: 'http://localhost:9200',
+        elasticUrl: ELASTIC_SEARCH_URL,
         onEventsReceived: async (highestTimestamp, events) => {
           logMessage(`event processor received ${events.length} events with the highest timestamp ${highestTimestamp}`);
           for (const event of events) {
