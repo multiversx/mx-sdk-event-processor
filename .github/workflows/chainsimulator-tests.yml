@@ -23,7 +23,7 @@ jobs:
 
       - name: Start Docker containers
         run: |
-          docker-compose -f .github/docker/docker-compose.yml up -d
+          docker compose -f .github/docker/docker-compose.yml up -d
 
       # Step 1: Wait for services to be healthy
       - name: Wait for services to be ready
