@@ -12,6 +12,7 @@ jobs:
 
   test-chainsimulator-e2e:
     runs-on: ubuntu-latest
+    needs: call-reusable-workflow  # Ensures this job waits for call-reusable-workflow
     strategy:
       matrix:
         node-version: [18.x]
