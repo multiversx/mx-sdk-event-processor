@@ -4,8 +4,16 @@ on:
   pull_request:
 
 jobs:
+  # This job references the reusable workflow directly at the top-level `uses`
+  call-reusable-workflow:
+    uses: multiversx/chain-simulator-reusable-workflow/.github/workflows/start-containers.yml@first-version
+    with:
+      with_elastic: true  # Enable Elasticsearch services
+      with_notifier: false # Do not enable notifier services
+
   test-chainsimulator-e2e:
     runs-on: ubuntu-latest
+    needs: call-reusable-workflow  # Ensures this job waits for call-reusable-workflow
     strategy:
       matrix:
         node-version: [18.x]
@@ -13,12 +21,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # Step 1: Call the reusable workflow to start containers
-      - name: Start Docker Containers
-        uses: multiversx/chain-simulator-reusable-workflow/.github/workflows/start-containers.yml@first-version
-        with:
-          with_elastic: true  # Enable Elasticsearch services
-          with_notifier: false  # Do not enable notifier services
+      # Step 1: Wait for services to be healthy
+      - name: Wait for services to be ready
+        run: |
+          echo "Waiting for services to be healthy..."
+          docker ps
+          docker logs chainsimulator
+          sleep 20 # Wait for 20 seconds to ensure services are up
 
       # Step 2: Check chainsimulator API
       - name: Check chainsimulator API
