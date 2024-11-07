@@ -19,15 +19,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Wait for services to be ready
+      - name: Check chainsimulator API
         run: |
-          echo "Waiting for services to be healthy..."
-          docker ps
-          docker logs chainsimulator
-          sleep 20 # Wait for 20 seconds to ensure services are up
-
-      - name: Print docker containers
-        run: docker ps
+          curl http://localhost:8085/simulator/observers
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
