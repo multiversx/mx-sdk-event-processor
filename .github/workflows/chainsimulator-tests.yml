@@ -30,7 +30,7 @@ jobs:
       - name: Start Docker containers
         run: |
           ls -lh
-          cd .
+          cd docker
           ls -lh
           cd .github
           ls -lh
