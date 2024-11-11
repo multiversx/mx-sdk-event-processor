@@ -21,6 +21,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Download Docker directory artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: docker
+          path: docker/
+
       - name: Start Docker containers
         run: |
           ls -lh
