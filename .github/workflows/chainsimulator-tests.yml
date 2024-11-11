@@ -32,7 +32,7 @@ jobs:
           ls -lh
           cd docker
           ls -lh
-          docker compose -f docker-compose.yml up -d
+          docker compose -f docker-compose.yml --profile elastic up -d
 
       # Step 1: Wait for services to be healthy
       - name: Wait for services to be ready
