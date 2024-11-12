@@ -40,6 +40,7 @@ jobs:
           echo "Waiting for services to be healthy..."
           docker ps
           docker logs chainsimulator
+          docker inspect chainsimulator
           sleep 20 # Wait for 20 seconds to ensure services are up
 
       # Step 2: Check chainsimulator API
