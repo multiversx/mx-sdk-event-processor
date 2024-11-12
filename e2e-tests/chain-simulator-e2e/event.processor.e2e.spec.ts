@@ -5,7 +5,7 @@ import { EventProcessor } from "../../src/event.processor";
 import { EventProcessorOptions } from "../../src/types/event.processor.options";
 
 const CHAIN_SIMULATOR_URL = 'http://localhost:8085';
-const ELASTIC_SEARCH_URL = 'http://localhost:9200';
+const ELASTIC_SEARCH_URL = 'http://elasticsearch:9200';
 const ALICE_ADDRESS = 'erd1qyu5wthldzr8wx5c9ucg8kjagg0jfs53s8nr3zpz3hypefsdd8ssycr6th';
 const BOB_ADDRESS = 'erd1spyavw0956vq68xj8y4tenjpq2wd5a9p2c6j8gsz7ztyrnpxrruqzu66jx';
 const CAROL_ADDRESS = 'erd1k2s324ww2g0yj38qn2ch2jwctdy8mnfxep94q9arncc6xecg3xaq6mjse8';
