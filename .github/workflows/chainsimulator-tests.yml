@@ -31,6 +31,7 @@ jobs:
         run: |
           ls -lh
           cd docker
+          cat overridable-config.toml
           ls -lh
           docker compose -f docker-compose.yml --profile elastic up -d
 
