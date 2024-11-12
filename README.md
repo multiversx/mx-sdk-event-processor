@@ -1,6 +1,6 @@
 # Event Processor for JavaScript
 
-Event processor for JavaScript and TypeScript (written in TypeScript).
+Event processor for JavaScript and TypeScript (written in TypeScript). 
 
 ## Distribution
 
