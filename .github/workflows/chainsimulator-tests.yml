@@ -38,6 +38,7 @@ jobs:
           docker ps
           sleep 10 # Allow time for containers to be started
           docker logs chainsimulator
+          sleep 20 # Wait for 20 seconds to ensure services are up
 
       # Step 2: Check chainsimulator API
       - name: Check chainsimulator API
