@@ -27,11 +27,8 @@ jobs:
           path: docker/
 
       - name: Start Docker containers
-        run: |
-          ls -lh
+        run: |  
           cd docker
-          cat overridable-config.toml
-          ls -lh
           docker compose -f docker-compose.yml --profile elastic up -d
 
       # Step 1: Wait for services to be healthy
@@ -41,8 +38,6 @@ jobs:
           docker ps
           sleep 10 # Allow time for containers to be started
           docker logs chainsimulator
-          docker inspect chainsimulator
-          sleep 20 # Wait for 20 seconds to ensure services are up
 
       # Step 2: Check chainsimulator API
       - name: Check chainsimulator API
