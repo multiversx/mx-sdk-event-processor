@@ -4,7 +4,6 @@ on:
   pull_request:
 
 jobs:
-  # This job references the reusable workflow directly at the top-level `uses`
   call-reusable-workflow:
     uses: multiversx/chain-simulator-reusable-workflow/.github/workflows/workflow.yml@v1
     with:
