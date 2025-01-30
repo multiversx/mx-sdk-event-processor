@@ -1,6 +1,6 @@
 {
   "name": "@multiversx/sdk-event-processor",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "MultiversX logs&events processor",
   "main": "lib/event.processor.js",
   "types": "lib/event.processor.d.ts",
