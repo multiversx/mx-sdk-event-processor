@@ -1,8 +1,12 @@
 {
   "name": "@multiversx/sdk-event-processor",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "MultiversX logs&events processor",
-  "main": "index.js",
+  "main": "lib/event.processor.js",
+  "types": "lib/event.processor.d.ts",
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "test": "jest --testPathPattern='(?<!\\.e2e)\\.spec\\.ts$'",
     "test:e2e": "jest --testPathPattern='\\.e2e\\.spec\\.ts$'",
