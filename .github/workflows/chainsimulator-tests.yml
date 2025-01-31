@@ -5,7 +5,7 @@ on:
 
 jobs:
   call-reusable-workflow:
-    uses: multiversx/chain-simulator-reusable-workflow/.github/workflows/workflow.yml@v1
+    uses: multiversx/chain-simulator-reusable-workflow/.github/workflows/workflow.yml@v2
     with:
       with_elastic: true  # Enable Elasticsearch services
       with_notifier: false # Do not enable notifier services
@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Download Docker directory artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: docker
           path: docker/
