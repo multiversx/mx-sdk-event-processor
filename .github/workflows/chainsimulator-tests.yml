@@ -5,7 +5,7 @@ on:
 
 jobs:
   call-reusable-workflow:
-    uses: multiversx/chain-simulator-reusable-workflow/.github/workflows/workflow.yml@v1
+    uses: multiversx/chain-simulator-reusable-workflow/.github/workflows/workflow.yml@v2
     with:
       with_elastic: true  # Enable Elasticsearch services
       with_notifier: false # Do not enable notifier services
